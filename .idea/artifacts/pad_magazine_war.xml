@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="war" name="pad-magazine:war">
+    <output-path>$PROJECT_DIR$/target</output-path>
+    <root id="archive" name="pad-magazine.war">
+      <element id="artifact" artifact-name="pad-magazine:war exploded" />
+    </root>
+  </artifact>
+</component>
