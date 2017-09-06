@@ -437,12 +437,12 @@
                                             </li>
                                             <li class="">
                                                 <a data-toggle="tab" href="#home17" aria-expanded="false">
-                                                    图片动画
+                                                    透明度动画
                                                 </a>
                                             </li>
                                             <li class="">
                                                 <a data-toggle="tab" href="#home18" aria-expanded="false">
-                                                    移动动画
+                                                    移动透明度动画
                                                 </a>
                                             </li>
                                             <li class="">
@@ -578,6 +578,9 @@
                                                 <!--所在的位置（x,y,width,height）-->
                                                 <key>Pos</key>
                                                 <string>250,300,400,150</string>
+                                                <key>stay</key>
+                                                <!--0不停留，1停留-->
+                                                <string>0</string>
                                                 </dict>
                                                 </dict></textarea>
                                                 </p>
@@ -621,12 +624,10 @@
                                             <div id="home17" class="tab-pane">
                                                 <p>
                                                     <textarea class="form-control" rows="20"><dict>
-			<!--在张图片上面添加特殊效果（索引从1开始一直到最后一张的位置）-->
 			<key>Index</key>
 			<string>1</string>
 			<key>AType</key>
-            <!-- move|alpha -->
-			<string>move</string>
+			<string>alpha</string>
 			<key>Content</key>
 			<dict>
 				<!--内容（webView/image）-->
@@ -636,14 +637,16 @@
 				<key>Content</key>
 				<string><![CDATA[6.png]]></string>
                 <!--开始的位置（x,y,width,height）-->
-				<key>StartPos</key>
+				<key>Frame</key>
 				<string>768,0,200,200</string>
+                <key>stay</key>
+                <!--0不停留，1停留-->
+                <string>0</string>
                 <!--结束的位置（x,y,width,height）-->
-				<key>OverPos</key>
-                <array>
-                    <string>568,0,200,200</string>
-                    <string>268,0,200,200</string>
-                </array>
+				<key>StartAlpha</key>
+				<string>0</string>
+                <key>OverAlpha</key>
+				<string>1</string>
                 <!--动画时间长度-->
 				<key>dur</key>
 				<string>.3</string>
@@ -663,7 +666,6 @@
 			<key>Index</key>
 			<string>1</string>
 			<key>AType</key>
-            <!-- move|alpha -->
 			<string>move</string>
 			<key>Content</key>
 			<dict>
@@ -673,6 +675,12 @@
                 <!--如果上面选的image，这个内容就要填图片名称-->
 				<key>Content</key>
 				<string><![CDATA[ <p style='background-color:transparent;'>Hello，Hello<br/>Hello，Hello<br/>Hello，Hello<br/></p>]]></string>
+                                                <!--开始透明度-->
+                                                <key>StartAlpha</key>
+                                                <string>1</string>
+                                                <!--结束透明度-->
+                                                <key>OverAlpha</key>
+                                                <string>1</string>
                                                 <!--开始的位置（x,y,width,height）-->
                                                 <key>StartPos</key>
                                                 <string>-200,0,200,200</string>
@@ -682,6 +690,9 @@
                                                     <string>568,0,200,200</string>
                                                     <string>268,0,200,200</string>
                                                 </array>
+                                                <key>stay</key>
+                                                <!--0不停留，1停留-->
+                                                <string>0</string>
                                                 <!--动画时间长度-->
                                                 <key>dur</key>
                                                 <string>2</string>
@@ -711,6 +722,9 @@
                     <key>Center</key>
                     <!--中心点(10,10)-->
                     <string>nil</string>
+                    <key>stay</key>
+                    <!--0不停留，1停留-->
+                    <string>0</string>
                     <key>Animate</key>
                     <!--0是关闭,1会有呼吸一样的动画-->
                     <string>0</string>
@@ -835,6 +849,9 @@
 			<key>center</key>
 			<!--中心点(10,10)-->
 			<string>nil</string>
+            <key>stay</key>
+            <!--0不停留，1停留-->
+            <string>0</string>
 			<!--延迟多长时间开始自动切换-->
 			<key>delay</key>
 			<string>0</string>
@@ -870,8 +887,15 @@
 	<dict>
 		<key>Content</key>
 		<string><![CDATA[6.png]]></string>
+        <!--元素开始的位置（x,y,width,height）-->
 		<key>pos</key>
 		<string>768,0,200,200</string>
+        <!--元素结束的位置（x,y,width,height）-->
+		<key>pos_end</key>
+		<string>768,0,200,200</string>
+        <key>stay</key>
+        <!--0不停留，1停留-->
+        <string>0</string>
         <!--蒙版开始的位置（x,y,width,height）-->
 		<key>StartPos</key>
 		<string>768,0,200,200</string>
