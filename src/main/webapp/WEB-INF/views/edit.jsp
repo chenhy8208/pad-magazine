@@ -671,10 +671,10 @@
 			<dict>
 				<!--内容（webView/image）-->
 				<key>ContentType</key>
-				<string>webView</string>
+				<string>image</string>
                 <!--如果上面选的image，这个内容就要填图片名称-->
 				<key>Content</key>
-				<string><![CDATA[ <p style='background-color:transparent;'>Hello，Hello<br/>Hello，Hello<br/>Hello，Hello<br/></p>]]></string>
+				<string><![CDATA[a.jpg]]></string>
                                                 <!--开始透明度-->
                                                 <key>StartAlpha</key>
                                                 <string>1</string>
