@@ -693,6 +693,9 @@
                                                 <key>stay</key>
                                                 <!--0不停留，1停留-->
                                                 <string>0</string>
+                                                <!--如果不是nil，将建出一个scrollview出来-->
+                                                <key>contentSize</key>
+                                                <string>nil</string>
                                                 <!--动画时间长度-->
                                                 <key>dur</key>
                                                 <string>2</string>
@@ -913,6 +916,7 @@
                                                 </p>
                                                 <a class="insertStr btn btn-default purple" href="javascript:void(0);"><i class="fa fa-plus"></i> 插入片段</a>
                                             </div>
+
 
 
                                         </div>
