@@ -15,6 +15,7 @@
     <script src="/jquery.format.js"></script>
     <style>
         a.insertStr{position:relative; top:10px;}
+        textarea.leo-font-14{font-size:16px;}
     </style>
 
     <script>
@@ -24,7 +25,7 @@
                 type:'GET',
                 url:"/fileList",
                 data:{path:'<c:out value="${path}" escapeXml="false" />'},
-                async:false,
+                //async:false,
                 success:function(msg)
                 {
                     $("#fileDataTbody").html(msg.data);
@@ -416,6 +417,11 @@
                                                 </a>
                                             </li>
                                             <li class="">
+                                                <a data-toggle="tab" href="#home25" aria-expanded="false">
+                                                    导航
+                                                </a>
+                                            </li>
+                                            <li class="">
                                                 <a data-toggle="tab" href="#home13" aria-expanded="false">
                                                     pageEnble
                                                 </a>
@@ -479,7 +485,7 @@
                                         <div class="tab-content tabs-flat">
                                             <div id="home11" class="tab-pane active">
                                                 <p>
-                                                    <textarea class="form-control" rows="8"><!--必须放到一开头最开始的位置,必须有-->
+                                                    <textarea class="form-control leo-font-14" rows="8"><!--必须放到一开头最开始的位置,必须有-->
 <key>totalPage</key>
 <string>100</string>
 <!--开始视频,没有填nil-->
@@ -496,7 +502,7 @@
 
                                             <div id="home12" class="tab-pane">
                                                 <p>
-                                                    <textarea class="form-control" rows="20"><key>menu</key>
+                                                    <textarea class="form-control leo-font-14" rows="20"><key>menu</key>
 <array>
 <dict>
     <key>Title</key>
@@ -520,9 +526,37 @@
                                                 <a class="insertStr btn btn-default purple" href="javascript:void(0);"><i class="fa fa-plus"></i> 插入片段</a>
                                             </div>
 
+
+
+                                            <div id="home25" class="tab-pane">
+                                                <p>
+                                                    <textarea class="form-control leo-font-14" rows="20"><key>nav</key>
+<array>
+<dict>
+    <key>Index</key>
+    <string>1</string>
+    <key>Title</key>
+    <string>话题 FEATURE</string>
+    <key>SubTitle</key>
+    <string>关爱她的家具渴望</string>
+</dict>
+<dict>
+    <key>Index</key>
+    <string>2</string>
+    <key>Title</key>
+    <string>话题 FEATURE</string>
+    <key>SubTitle</key>
+    <string>关爱她的家具渴望</string>
+</dict>
+</array></textarea>
+                                                </p>
+                                                <a class="insertStr btn btn-default purple" href="javascript:void(0);"><i class="fa fa-plus"></i> 插入片段</a>
+                                            </div>
+
+
                                             <div id="home13" class="tab-pane">
                                                 <p>
-                                                    <textarea class="form-control" rows="20"><dict>
+                                                    <textarea class="form-control leo-font-14" rows="20"><dict>
 			<key>Index</key>
 			<string>1</string>
 			<key>AType</key>
@@ -540,7 +574,7 @@
 
                                             <div id="home14" class="tab-pane">
                                                 <p>
-                                                    <textarea class="form-control" rows="20"><dict>
+                                                    <textarea class="form-control leo-font-14" rows="20"><dict>
 			<key>Index</key>
 			<string>1</string>
 			<key>AType</key>
@@ -564,7 +598,7 @@
 
                                             <div id="home15" class="tab-pane">
                                                 <p>
-                                                    <textarea class="form-control" rows="20"><dict>
+                                                    <textarea class="form-control leo-font-14" rows="20"><dict>
 			<!--在张图片上面添加特殊效果（索引从1开始一直到最后一张的位置）-->
 			<key>Index</key>
 			<string>1</string>
@@ -589,7 +623,7 @@
 
                                             <div id="home16" class="tab-pane">
                                                 <p>
-                                                    <textarea class="form-control" rows="20"><dict>
+                                                    <textarea class="form-control leo-font-14" rows="20"><dict>
 			<!--在张图片上面添加特殊效果（索引从1开始一直到最后一张的位置）-->
 			<key>Index</key>
 			<string>1</string>
@@ -623,7 +657,7 @@
 
                                             <div id="home17" class="tab-pane">
                                                 <p>
-                                                    <textarea class="form-control" rows="20"><dict>
+                                                    <textarea class="form-control leo-font-14" rows="20"><dict>
 			<key>Index</key>
 			<string>1</string>
 			<key>AType</key>
@@ -661,7 +695,7 @@
 
                                             <div id="home18" class="tab-pane">
                                                 <p>
-                                                    <textarea class="form-control" rows="20"><dict>
+                                                    <textarea class="form-control leo-font-14" rows="20"><dict>
 			<!--在张图片上面添加特殊效果（索引从1开始一直到最后一张的位置）-->
 			<key>Index</key>
 			<string>1</string>
@@ -710,7 +744,7 @@
 
                                             <div id="home19" class="tab-pane">
                                                 <p>
-                                                    <textarea class="form-control" rows="20"><dict>
+                                                    <textarea class="form-control leo-font-14" rows="20"><dict>
 			<key>Index</key>
 			<string>1</string>
 			<key>AType</key>
@@ -756,7 +790,7 @@
 
                                             <div id="home20" class="tab-pane">
                                                 <p>
-                                                    <textarea class="form-control" rows="20"><dict>
+                                                    <textarea class="form-control leo-font-14" rows="20"><dict>
 			<key>Index</key>
 			<string>1</string>
 			<key>AType</key>
@@ -795,7 +829,7 @@
 
                                             <div id="home21" class="tab-pane">
                                                 <p>
-                                                    <textarea class="form-control" rows="20"><dict>
+                                                    <textarea class="form-control leo-font-14" rows="20"><dict>
 			<key>Index</key>
 			<string>1</string>
 			<key>AType</key>
@@ -812,7 +846,7 @@
 
                                             <div id="home22" class="tab-pane">
                                                 <p>
-                                                    <textarea class="form-control" rows="20"><dict>
+                                                    <textarea class="form-control leo-font-14" rows="20"><dict>
 			<key>Index</key>
 			<string>1</string>
 			<key>AType</key>
@@ -842,7 +876,7 @@
 
                                             <div id="home23" class="tab-pane">
                                                 <p>
-                                                    <textarea class="form-control" rows="20"><dict>
+                                                    <textarea class="form-control leo-font-14" rows="20"><dict>
 			<key>Index</key>
 			<string>1</string>
 			<key>AType</key>
@@ -881,7 +915,7 @@
 
                                             <div id="home24" class="tab-pane">
                                                 <p>
-                                                    <textarea class="form-control" rows="20"><dict>
+                                                    <textarea class="form-control leo-font-14" rows="20"><dict>
 	<key>Index</key>
 	<string>1</string>
 	<key>AType</key>
@@ -946,7 +980,7 @@
                             <div class="widget-body" style="height: auto;">
                                 <form method="post" action="editSave" class="form-horizontal" role="form">
 
-                                    <textarea class="form-control" rows="15" placeholder="content" name="content"><c:out value="${content}" escapeXml="false" /></textarea>
+                                    <textarea class="form-control leo-font-14" rows="15" placeholder="content" name="content"><c:out value="${content}" escapeXml="false" /></textarea>
                                     <input type="hidden" name="path" value="<c:out value="${path}" escapeXml="false" />" />
                                     <div class="horizontal-space"></div>
                                     <div>
