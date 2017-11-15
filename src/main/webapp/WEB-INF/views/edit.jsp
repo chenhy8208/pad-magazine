@@ -848,7 +848,7 @@
 			<dict>
 				<key>Img</key>
 				<string><![CDATA[6.png]]></string>
-                <key>thumbnail</key>
+				<key>Thumbnail</key>
 				<string><![CDATA[6.png]]></string>
 				<key>Link</key>
 				<!--<![CDATA[http://www.baidu.com]]>-->
