@@ -422,6 +422,11 @@
                                                 </a>
                                             </li>
                                             <li class="">
+                                                <a data-toggle="tab" href="#home26" aria-expanded="false">
+                                                    视频动画
+                                                </a>
+                                            </li>
+                                            <li class="">
                                                 <a data-toggle="tab" href="#home13" aria-expanded="false">
                                                     pageEnble
                                                 </a>
@@ -549,6 +554,26 @@
     <string>关爱她的家具渴望</string>
 </dict>
 </array></textarea>
+                                                </p>
+                                                <a class="insertStr btn btn-default purple" href="javascript:void(0);"><i class="fa fa-plus"></i> 插入片段</a>
+                                            </div>
+
+                                            <div id="home26" class="tab-pane">
+                                                <p>
+                                                    <textarea class="form-control leo-font-14" rows="20"><dict>
+			<key>Index</key>
+			<string>1</string>
+			<key>AType</key>
+			<string>mediaAnimation</string>
+			<key>Content</key>
+			<dict>
+                <key>Pos</key>
+				<string>0,0,768,1024</string>
+                <!--支持mp4格式-->
+				<key>name</key>
+				<string>nil</string>
+			</dict>
+		</dict></textarea>
                                                 </p>
                                                 <a class="insertStr btn btn-default purple" href="javascript:void(0);"><i class="fa fa-plus"></i> 插入片段</a>
                                             </div>
@@ -781,6 +806,12 @@
                             <string><![CDATA[6.png]]></string>
                         </dict>
                     </array>
+                    <!--动画时间长度-->
+                    <key>dur</key>
+                    <string>0</string>
+                    <!--延迟几秒执行-->
+                    <key>delay</key>
+                    <string>0</string>
                 </dict>
             </array>
 </dict></textarea>
@@ -816,6 +847,8 @@
 			<array>
 			<dict>
 				<key>Img</key>
+				<string><![CDATA[6.png]]></string>
+                <key>thumbnail</key>
 				<string><![CDATA[6.png]]></string>
 				<key>Link</key>
 				<!--<![CDATA[http://www.baidu.com]]>-->
