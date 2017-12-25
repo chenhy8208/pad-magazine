@@ -486,6 +486,11 @@
                                                     蒙版
                                                 </a>
                                             </li>
+                                            <li class="">
+                                                <a data-toggle="tab" href="#home27" aria-expanded="false">
+                                                    滑块
+                                                </a>
+                                            </li>
                                         </ul>
                                         <div class="tab-content tabs-flat">
                                             <div id="home11" class="tab-pane active">
@@ -979,6 +984,54 @@
 		<key>delay</key>
 		<string>0</string>
 	</dict>
+</dict></textarea>
+                                                </p>
+                                                <a class="insertStr btn btn-default purple" href="javascript:void(0);"><i class="fa fa-plus"></i> 插入片段</a>
+                                            </div>
+
+
+                                            <div id="home27" class="tab-pane">
+                                                <p>
+                                                    <textarea class="form-control leo-font-14" rows="20"><dict>
+			<key>Index</key>
+			<string>1</string>
+			<key>AType</key>
+			<string>slide</string>
+			<key>Content</key>
+            <array>
+                <dict>
+                    <key>Img</key>
+                    <string><![CDATA[6.png]]></string>
+                    <key>BtnPos</key>
+                    <string>768,0,200,200</string>
+                    <key>BtnCenter</key>
+                    <!--中心点(10,10)-->
+                    <string>nil</string>
+                    <key>stay</key>
+                    <!--0不停留，1停留-->
+                    <string>0</string>
+                    <key>Animate</key>
+                    <!--0是关闭,1会有呼吸一样的动画-->
+                    <string>0</string>
+                    <!--整个画面的frame-->
+                    <key>Pos</key>
+                    <string>768,0,200,200</string>
+                    <!--左边显示多少-->
+                    <key>FirstPageScale</key>
+                    <string>.5</string>
+                    <key>BigPic</key>
+                    <array>
+                        <dict>
+                            <key>Img</key>
+                            <string><![CDATA[6.png]]></string>
+                        </dict>
+                        <dict>
+                            <key>Img</key>
+                            <string><![CDATA[6.png]]></string>
+                        </dict>
+                    </array>
+                </dict>
+            </array>
 </dict></textarea>
                                                 </p>
                                                 <a class="insertStr btn btn-default purple" href="javascript:void(0);"><i class="fa fa-plus"></i> 插入片段</a>
