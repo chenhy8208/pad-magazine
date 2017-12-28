@@ -1004,12 +1004,6 @@
                     <string><![CDATA[6.png]]></string>
                     <key>BtnPos</key>
                     <string>768,0,200,200</string>
-                    <key>BtnCenter</key>
-                    <!--中心点(10,10)-->
-                    <string>nil</string>
-                    <key>stay</key>
-                    <!--0不停留，1停留-->
-                    <string>0</string>
                     <key>Animate</key>
                     <!--0是关闭,1会有呼吸一样的动画-->
                     <string>0</string>
