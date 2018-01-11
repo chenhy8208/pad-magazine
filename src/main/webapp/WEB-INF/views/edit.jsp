@@ -877,6 +877,14 @@
 			<!--0.0-1.0之间-->
 			<key>volume</key>
 			<string>0.5</string>
+			<key>btnNormal</key>
+			<string><![CDATA[6.png]]></string>
+			<key>normalPos</key>
+			<string>0,0,200,200</string>
+			<key>btnSelected</key>
+			<string><![CDATA[6.png]]></string>
+			<key>selectedPos</key>
+			<string>0,0,200,200</string>
 </dict></textarea>
                                                 </p>
                                                 <a class="insertStr btn btn-default purple" href="javascript:void(0);"><i class="fa fa-plus"></i> 插入片段</a>
