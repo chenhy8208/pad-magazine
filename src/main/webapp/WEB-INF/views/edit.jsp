@@ -879,11 +879,9 @@
 			<string>0.5</string>
 			<key>btnNormal</key>
 			<string><![CDATA[6.png]]></string>
-			<key>normalPos</key>
-			<string>0,0,200,200</string>
 			<key>btnSelected</key>
 			<string><![CDATA[6.png]]></string>
-			<key>selectedPos</key>
+			<key>pos</key>
 			<string>0,0,200,200</string>
 </dict></textarea>
                                                 </p>
