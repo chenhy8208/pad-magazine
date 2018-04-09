@@ -309,6 +309,10 @@
                             <i class="fa fa-angle-right"></i>
                             编辑
                         </small>
+                        <small>
+                            <i class="fa fa-angle-right"></i>
+                            普通模式
+                        </small>
                     </h1>
                 </div>
                 <!--Header Buttons-->
@@ -629,9 +633,9 @@
                                             <div id="home15" class="tab-pane">
                                                 <p>
                                                     <textarea class="form-control leo-font-14" rows="20"><dict>
-			<!--在张图片上面添加特殊效果（索引从1开始一直到最后一张的位置）-->
 			<key>Index</key>
 			<string>1</string>
+                                                        <!--在张图片上面添加特殊效果（索引从1开始一直到最后一张的位置）-->
 			<key>AType</key>
 			<string>webView</string>
 			<key>Content</key>
@@ -654,9 +658,9 @@
                                             <div id="home16" class="tab-pane">
                                                 <p>
                                                     <textarea class="form-control leo-font-14" rows="20"><dict>
-			<!--在张图片上面添加特殊效果（索引从1开始一直到最后一张的位置）-->
 			<key>Index</key>
 			<string>1</string>
+                                                        <!--在张图片上面添加特殊效果（索引从1开始一直到最后一张的位置）-->
 			<key>AType</key>
 			<string>media</string>
 			<key>Content</key>
@@ -726,9 +730,9 @@
                                             <div id="home18" class="tab-pane">
                                                 <p>
                                                     <textarea class="form-control leo-font-14" rows="20"><dict>
-			<!--在张图片上面添加特殊效果（索引从1开始一直到最后一张的位置）-->
 			<key>Index</key>
 			<string>1</string>
+                                                        <!--在张图片上面添加特殊效果（索引从1开始一直到最后一张的位置）-->
 			<key>AType</key>
 			<string>move</string>
 			<key>Content</key>

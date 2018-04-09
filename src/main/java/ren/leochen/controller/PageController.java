@@ -1,10 +1,19 @@
 package ren.leochen.controller;
 
+import com.dd.plist.NSArray;
+import com.dd.plist.NSDictionary;
+import com.dd.plist.NSObject;
+import com.dd.plist.PropertyListParser;
+import com.google.common.io.Resources;
 import org.apache.commons.collections.Buffer;
 import org.apache.commons.collections.map.HashedMap;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.util.StringBuilders;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
+import org.xml.sax.SAXException;
 import ren.leochen.common.IOUtil;
 import ren.leochen.common.ZipUtil;
 import ren.leochen.common.ZipUtils;
@@ -260,9 +270,28 @@ public class PageController {
         return list;
     }
 
-    @RequestMapping("/edit")
-    public String edit(HttpServletRequest request, HttpServletResponse response, ModelMap model){
-        String path = request.getParameter("path");
+    /**
+     * 绑定左侧的导航链接
+     * @param model
+     * @param path
+     */
+    private void bindNavLink(ModelMap model, String path) {
+        //普通模式和页面模式的导航
+        String normalPattern = "edit?path=" + path;
+        String pagePattern = "page_edit?path=" + path;
+
+        model.put("normalPattern", normalPattern);
+        model.put("pagePattern", pagePattern);
+    }
+
+    /**
+     * 设置path的信息
+     * @param model
+     * @param path
+     * @return
+     */
+    private String setPathToModel(ModelMap model, String path) {
+
         model.put("path", path);
 
         try {
@@ -273,8 +302,16 @@ public class PageController {
 
         model.put("realpath", path);
 
-        String plistPath = path+"/a.plist";
+        return path;
+    }
 
+    /**
+     * 获取plist里面的内容值
+     * @param model
+     * @param plistPath
+     * @return
+     */
+    private String getPlistContentFromPath(ModelMap model, String plistPath) {
         try(BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(new File(plistPath)), "utf-8"));)
         {
             String content = "";
@@ -285,13 +322,398 @@ public class PageController {
             }
 
             model.put("content", content);
+
+            return content;
         } catch (Exception e) {
             throw new RuntimeException("读取plist文件失败 -> err >>> " + e.getMessage());
         }
+    }
 
-        model.put("files", getMagezineFiles(path));
+    @RequestMapping("/edit")
+    public String edit(HttpServletRequest request, HttpServletResponse response, ModelMap model){
+        String path = request.getParameter("path");
+
+        bindNavLink(model, path);
+        String realpath = setPathToModel(model, path);
+        String plistPath = realpath+"/a.plist";
+        String content = getPlistContentFromPath(model, plistPath);
+        model.put("files", getMagezineFiles(realpath));
         return "edit";
     }
+
+    /**
+     * 获取一个Key元素后面的value值
+     * @param key
+     * @return
+     */
+    public Element getPlistKeyNodeValue(Element key) {
+        if (key == null) return null;
+
+        return key.nextElementSibling();
+    }
+
+    @RequestMapping("/page_edit")
+    public String pageEdit(HttpServletRequest request, HttpServletResponse response, ModelMap model){
+        String path = request.getParameter("path");
+
+        bindNavLink(model, path);
+        String realpath = setPathToModel(model, path);
+        String plistPath = realpath+"/a.plist";
+        String content = getPlistContentFromPath(model, plistPath);
+
+        //Jaxp解析文档
+        long totalPage = 0;
+        try {
+            org.jsoup.nodes.Document document = Jsoup.parse(new File(plistPath), "UTF-8"); //必须使用这种方式解析
+
+            Elements elements = document.getElementsContainingOwnText("totalPage");
+            if (elements != null && elements.size() > 0) {
+                Element element = getPlistKeyNodeValue(elements.get(0));
+                if (element != null) {
+                    totalPage = NumberUtils.toLong(element.text());
+                }
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        System.out.println("totalPage = " + totalPage);
+
+
+        model.put("totalPage", totalPage);
+        model.put("files", getMagezineFiles(realpath));
+        return "page_edit";
+    }
+
+    /**
+     * 删除页面，删除某一页
+     * @param request
+     * @param model
+     * @return
+     */
+    @RequestMapping("/deletePage")
+    public @ResponseBody Map<String,Object> deletePage(HttpServletRequest request, ModelMap model)
+    {
+        Map<String, Object> rs = new HashedMap();
+
+        String path = request.getParameter("path");
+        try {
+            path = URLDecoder.decode(path, "UTF-8");
+        }catch (UnsupportedEncodingException e) {
+            throw new RuntimeException("路径错误 -> err >>> " + e.getMessage());
+        }
+
+        String plistPath = path + "/a.plist";
+        long pageIndex = NumberUtils.toLong(request.getParameter("pageIndex"));
+        boolean result = doDeletePage(plistPath, pageIndex);
+
+        rs.put("state", result? 1: 0);
+
+        return rs;
+    }
+
+    /**
+     * 在某页之前插入一页
+     * @param request
+     * @param model
+     * @return
+     */
+    @RequestMapping("/insertPage")
+    public @ResponseBody Map<String,Object> insertPage(HttpServletRequest request, ModelMap model)
+    {
+        Map<String, Object> rs = new HashedMap();
+
+        String path = request.getParameter("path");
+        try {
+            path = URLDecoder.decode(path, "UTF-8");
+        }catch (UnsupportedEncodingException e) {
+            throw new RuntimeException("路径错误 -> err >>> " + e.getMessage());
+        }
+
+        String plistPath = path + "/a.plist";
+        long pageIndex = NumberUtils.toLong(request.getParameter("pageIndex"));
+        boolean result = doInsertPage(plistPath, pageIndex);
+
+        rs.put("state", result? 1: 0);
+
+        return rs;
+    }
+
+
+    /**
+     * jsoup的document写回到文件
+     * @param plist
+     * @param document
+     */
+    private void writeToPlistFile(File plist, org.jsoup.nodes.Document document) throws Exception {
+        try(PrintWriter writer = new PrintWriter(plist, "UTF-8")){
+            writer.write(document.html());
+            writer.flush();
+            writer.close();
+        }
+    }
+
+    /**
+     * NSArray下面的dictionary里面的index,大于的加一
+     * @param array
+     * @param pageIndex
+     */
+    private void insertIndexFromNSArray(NSArray array,long pageIndex) {
+        if (array != null && array.count() > 0) {
+            for (int i = 0; i < array.getArray().length; i ++) {
+                NSDictionary dict = (NSDictionary)array.getArray()[i];
+                long index = NumberUtils.toLong(dict.get("Index").toString());
+                //大于这一页的需要+1
+                if (index > pageIndex) {
+                    dict.put("Index", (index + 1)+"");
+                    array.setValue(i, dict);
+                }
+            }
+        }
+    }
+
+    /**
+     * 删除NSArray下面的dictionary里面的index,相同的删除，大于的减一
+     * @param array
+     * @param pageIndex
+     */
+    private void removeIndexFromNSArray(NSArray array,long pageIndex) {
+        if (array != null && array.count() > 0) {
+            for (int i = 0; i < array.getArray().length; i ++) {
+                NSDictionary dict = (NSDictionary)array.getArray()[i];
+                long index = NumberUtils.toLong(dict.get("Index").toString());
+                //正好那一页需要删除
+                if (index == pageIndex) {
+                    array.remove(i);
+                }
+            }
+
+            for (int i = 0; i < array.getArray().length; i ++) {
+                NSDictionary dict = (NSDictionary)array.getArray()[i];
+                long index = NumberUtils.toLong(dict.get("Index").toString());
+                //大于这一页的需要-1
+                if (index > pageIndex) {
+                    dict.put("Index", (index - 1)+"");
+                    array.setValue(i, dict);
+                }
+            }
+        }
+    }
+
+    /**
+     * 判断是背景图片，或者预览图
+     * @param filename
+     * @param pageIndex
+     * @return
+     */
+    private boolean isSystemBackgroundPicture(String filename, long pageIndex) {
+        return filename.equalsIgnoreCase(pageIndex+".jpg") ||
+                filename.equalsIgnoreCase(pageIndex+".png") ||
+                filename.equalsIgnoreCase("page_"+pageIndex+".jpg") ||
+                filename.equalsIgnoreCase("page_"+pageIndex+".png");
+    }
+
+    /**
+     * 将文件名改成文件名+step
+     * @param dirPath
+     * @param currentIndex
+     * @param step
+     */
+    private void updatePictureName(String dirPath, long currentIndex, int step) {
+        long newIndex = (currentIndex + step);
+
+        if (new File(dirPath + "/" + currentIndex+".jpg").exists()) {
+            new File(dirPath + "/" + currentIndex+".jpg").renameTo(new File(dirPath + "/" + newIndex+".jpg"));
+        }
+
+        if (new File(dirPath + "/" + currentIndex+".png").exists()) {
+            new File(dirPath + "/" + currentIndex+".png").renameTo(new File(dirPath + "/" + newIndex+".png"));
+        }
+
+        if (new File(dirPath + "/page_"+currentIndex+".jpg").exists()) {
+            new File(dirPath + "/page_"+currentIndex+".jpg").renameTo(new File(dirPath + "/page_"+newIndex+".jpg"));
+        }
+
+        if (new File(dirPath + "/page_"+currentIndex+".png").exists()) {
+            new File(dirPath + "/page_"+currentIndex+".png").renameTo(new File(dirPath + "/page_"+newIndex+".png"));
+        }
+    }
+
+    /**
+     * plist文档，在指定页码之前插入，把后面所有的页码都往后挪
+     * @param plistPath
+     * @param pageIndex
+     * @return
+     */
+    private boolean doInsertPage(String plistPath, long pageIndex) {
+        File plist = new File(plistPath);
+        long totalPage = 0;
+        try {
+            NSDictionary root = (NSDictionary) PropertyListParser.parse(plist);
+
+            //修改总页数
+            totalPage = NumberUtils.toLong(root.get("totalPage").toString());
+            System.out.println("totalPage = " + totalPage);
+            root.put("totalPage", (totalPage + 1) +"");
+
+            //修改menu，如果GO的数字大于页码，则需要+1
+            NSArray menu = (NSArray)root.get("menu");
+            for (int i = 0; i < menu.getArray().length; i ++) {
+                NSDictionary dict = (NSDictionary)menu.getArray()[i];
+                long index = NumberUtils.toLong(dict.get("Go").toString());
+                //GO跳转，大于这一页的需要-1
+                if (index > pageIndex) {
+                    dict.put("Go", (index + 1)+"");
+                    menu.setValue(i, dict);
+                }
+            }
+
+            //修改nav导航
+            NSArray nav = (NSArray)root.get("nav");
+            insertIndexFromNSArray(nav, pageIndex);
+
+            //修改正式的效果
+            NSArray aPlus = (NSArray)root.get("APlus");
+            insertIndexFromNSArray(aPlus, pageIndex);
+
+            //修改正式效果的内部效果
+            for (int i = 0; i < aPlus.getArray().length; i ++) {
+                NSDictionary dict = (NSDictionary)aPlus.getArray()[i];
+                if(dict.get("AType") == null) continue;
+
+                String aType = dict.get("AType").toString();
+
+                //修改带跳转的内容，大于删除页的，要加一
+                if (aType.equalsIgnoreCase("menu")) {
+                    NSDictionary content = (NSDictionary)dict.get("Content");
+
+                    if (content.get("Go") != null) {
+                        long index = NumberUtils.toLong(content.get("Go").toString());
+                        //GO跳转，大于这一页的需要+1
+                        if (index > pageIndex) {
+                            content.put("Go", (index + 1) + "");
+                            dict.put("Content", content);
+                            aPlus.setValue(i, dict);
+                        }
+                    }
+
+                }
+            }
+
+            //图片文件处理
+            File parentDir = plist.getParentFile();
+            //倒过来把后面的图片文件名进行修改，满足加一的条件
+            String dirPath = parentDir.getAbsolutePath();
+            for (long i = totalPage; i > pageIndex; i --) {
+                updatePictureName(dirPath, i, +1);
+            }
+
+            //保存到原来的文件
+            PropertyListParser.saveAsXML(root, plist);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * plist文档，删除指定的页面，把后面所有的页码都往前挪
+     * @param plistPath
+     * @param pageIndex
+     * @return
+     */
+    private boolean doDeletePage(String plistPath, long pageIndex) {
+
+        File plist = new File(plistPath);
+        long totalPage = 0;
+        try {
+            NSDictionary root = (NSDictionary) PropertyListParser.parse(plist);
+
+            //修改总页数
+            totalPage = NumberUtils.toLong(root.get("totalPage").toString());
+            System.out.println("totalPage = " + totalPage);
+            root.put("totalPage", (totalPage - 1) +"");
+
+            //修改menu，如果GO的数字大于删除的页码，则需要-1
+            NSArray menu = (NSArray)root.get("menu");
+            for (int i = 0; i < menu.getArray().length; i ++) {
+                NSDictionary dict = (NSDictionary)menu.getArray()[i];
+                long index = NumberUtils.toLong(dict.get("Go").toString());
+                //GO跳转，大于这一页的需要-1
+                if (index > pageIndex) {
+                    dict.put("Go", (index - 1)+"");
+                    menu.setValue(i, dict);
+                }
+            }
+
+            //修改nav导航
+            NSArray nav = (NSArray)root.get("nav");
+            removeIndexFromNSArray(nav, pageIndex);
+
+            //修改正式的效果
+            NSArray aPlus = (NSArray)root.get("APlus");
+            removeIndexFromNSArray(aPlus, pageIndex);
+
+            //修改正式效果的内部效果
+            for (int i = 0; i < aPlus.getArray().length; i ++) {
+                NSDictionary dict = (NSDictionary)aPlus.getArray()[i];
+                if(dict.get("AType") == null) continue;
+
+                String aType = dict.get("AType").toString();
+
+                //修改带跳转的内容，大于删除页的，要减一
+                if (aType.equalsIgnoreCase("menu")) {
+                    NSDictionary content = (NSDictionary)dict.get("Content");
+
+                    if (content.get("Go") != null) {
+                        long index = NumberUtils.toLong(content.get("Go").toString());
+                        //GO跳转，大于这一页的需要-1
+                        if (index > pageIndex) {
+                            content.put("Go", (index - 1) + "");
+                            dict.put("Content", content);
+                            aPlus.setValue(i, dict);
+                        }
+                    }
+
+                }
+            }
+
+            //图片文件处理
+            File parentDir = plist.getParentFile();
+            if (parentDir != null && parentDir.isDirectory()) {
+                for (File file : parentDir.listFiles()) {
+                    if (file.isFile()) {
+                        String name = file.getName();
+                        //删除对应的背景图、预览图
+                        if (isSystemBackgroundPicture(name, pageIndex)) {
+                            file.delete();
+                        }
+                    }
+                }
+            }
+
+            //倒过来把后面的图片文件名进行修改，满足减1的条件
+            String dirPath = parentDir.getAbsolutePath();
+            //for (long i = totalPage; i > pageIndex; i --) {
+            for (long i = pageIndex + 1; i <= totalPage; i ++) {
+                updatePictureName(dirPath, i, -1);
+            }
+
+            //保存到原来的文件
+            PropertyListParser.saveAsXML(root, plist);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+
+        return true;
+    }
+
 
     @RequestMapping("/index")
     public void index(HttpServletRequest request, ModelMap model) {

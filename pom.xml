@@ -70,10 +70,17 @@
 
         <!--Lucene-->
         <jsoup.version>1.9.2</jsoup.version>
+        <dd-plist.version>1.16</dd-plist.version>
 
     </properties>
 
     <dependencies>
+
+        <dependency>
+            <groupId>com.googlecode.plist</groupId>
+            <artifactId>dd-plist</artifactId>
+            <version>${dd-plist.version}</version>
+        </dependency>
 
         <!-- https://mvnrepository.com/artifact/net.sourceforge.jtds/jtds -->
         <dependency>
