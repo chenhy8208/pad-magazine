@@ -360,7 +360,7 @@
                         </small>
                         <small>
                             <i class="fa fa-angle-right"></i>
-                            普通模式
+                            页码模式
                         </small>
                     </h1>
                 </div>
