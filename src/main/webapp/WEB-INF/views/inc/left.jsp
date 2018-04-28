@@ -34,7 +34,7 @@
             <li>
                 <a href="${normalPattern}">
                     <i class="menu-icon fa fa-pencil-square-o"></i>
-                    <span class="menu-text"> 普通模式 </span>
+                    <span class="menu-text"> 完整编辑 </span>
                 </a>
             </li>
         </c:if>

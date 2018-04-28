@@ -262,50 +262,52 @@ public class PageController {
             new RuntimeException("备份plist文件过程中出错了,err = " + e.getMessage());
         }
 
-        if (page > 0 && StringUtils.isNoneBlank(StringUtils.trim(content))) {
-            //分页编辑
-            //2-删除以前plist中的对应页的效果
-            try {
-                NSDictionary root = (NSDictionary) PropertyListParser.parse(plist);
+        if (page > 0) {
+            if (StringUtils.isNoneBlank(StringUtils.trim(content))) {
+                //分页编辑
+                //2-删除以前plist中的对应页的效果
+                try {
+                    NSDictionary root = (NSDictionary) PropertyListParser.parse(plist);
 
-                //修改正式的效果
-                NSArray aPlus = (NSArray)root.get("APlus");
-                //删除指定页
-                this.deletePageFromNSArray(aPlus, page);
-                //保存到原来的文件
-                PropertyListParser.saveAsXML(root, plist);
+                    //修改正式的效果
+                    NSArray aPlus = (NSArray)root.get("APlus");
+                    //删除指定页
+                    this.deletePageFromNSArray(aPlus, page);
+                    //保存到原来的文件
+                    PropertyListParser.saveAsXML(root, plist);
 
-            } catch (Exception e) {
-                new RuntimeException("删除以前plist中的对应页的效果过程中出错了,err = " + e.getMessage());
-            }
-
-            //3-添加进行的内容
-            try {
-                //新的内容
-                NSArray newContent = this.getNSArrayFromNSDictionaryString(content);
-
-                //保存
-                NSDictionary root = (NSDictionary) PropertyListParser.parse(plist);
-                NSArray aPlus = (NSArray)root.get("APlus");
-
-                NSArray list = new NSArray(aPlus.getArray().length + newContent.getArray().length);
-                int index = 0;
-                //添加新的内容
-                for (int i = 0; i < newContent.getArray().length; i ++) {
-                    NSDictionary dict = (NSDictionary)newContent.getArray()[i];
-                    list.setValue(index ++, dict);
-                }
-                //添加老的内容
-                for (int i = 0; i < aPlus.getArray().length; i ++) {
-                    NSDictionary dict = (NSDictionary)aPlus.getArray()[i];
-                    list.setValue(index ++, dict);
+                } catch (Exception e) {
+                    new RuntimeException("删除以前plist中的对应页的效果过程中出错了,err = " + e.getMessage());
                 }
 
-                root.put("APlus", list);
-                //保存到原来的文件
-                PropertyListParser.saveAsXML(root, plist);
-            } catch (Exception e) {
-                new RuntimeException("格式化新的xml过程中出错了,err = " + e.getMessage());
+                //3-添加进行的内容
+                try {
+                    //新的内容
+                    NSArray newContent = this.getNSArrayFromNSDictionaryString(content);
+
+                    //保存
+                    NSDictionary root = (NSDictionary) PropertyListParser.parse(plist);
+                    NSArray aPlus = (NSArray)root.get("APlus");
+
+                    NSArray list = new NSArray(aPlus.getArray().length + newContent.getArray().length);
+                    int index = 0;
+                    //添加新的内容
+                    for (int i = 0; i < newContent.getArray().length; i ++) {
+                        NSDictionary dict = (NSDictionary)newContent.getArray()[i];
+                        list.setValue(index ++, dict);
+                    }
+                    //添加老的内容
+                    for (int i = 0; i < aPlus.getArray().length; i ++) {
+                        NSDictionary dict = (NSDictionary)aPlus.getArray()[i];
+                        list.setValue(index ++, dict);
+                    }
+
+                    root.put("APlus", list);
+                    //保存到原来的文件
+                    PropertyListParser.saveAsXML(root, plist);
+                } catch (Exception e) {
+                    new RuntimeException("格式化新的xml过程中出错了,err = " + e.getMessage());
+                }
             }
         } else {
             //完整保存
