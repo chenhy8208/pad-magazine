@@ -313,6 +313,12 @@
                             <i class="fa fa-angle-right"></i>
                             普通模式
                         </small>
+                        <c:if test="${page > 0}">
+                            <small>
+                                <i class="fa fa-angle-right"></i>
+                                正在编辑<font color="red">第<b>${page}</b>页</font>
+                            </small>
+                        </c:if>
                     </h1>
                 </div>
                 <!--Header Buttons-->
@@ -573,7 +579,7 @@
                                                 <p>
                                                     <textarea class="form-control leo-font-14" rows="20"><dict>
 			<key>Index</key>
-			<string>1</string>
+			<string>${page}</string>
 			<key>AType</key>
 			<string>mediaAnimation</string>
 			<key>Content</key>
@@ -594,7 +600,7 @@
                                                 <p>
                                                     <textarea class="form-control leo-font-14" rows="20"><dict>
 			<key>Index</key>
-			<string>1</string>
+			<string>${page}</string>
 			<key>AType</key>
 			<string>property</string>
 			<key>Content</key>
@@ -612,7 +618,7 @@
                                                 <p>
                                                     <textarea class="form-control leo-font-14" rows="20"><dict>
 			<key>Index</key>
-			<string>1</string>
+			<string>${page}</string>
 			<key>AType</key>
 			<string>menu</string>
 			<key>Content</key>
@@ -636,7 +642,7 @@
                                                 <p>
                                                     <textarea class="form-control leo-font-14" rows="20"><dict>
 			<key>Index</key>
-			<string>1</string>
+			<string>${page}</string>
                                                         <!--在张图片上面添加特殊效果（索引从1开始一直到最后一张的位置）-->
 			<key>AType</key>
 			<string>webView</string>
@@ -661,7 +667,7 @@
                                                 <p>
                                                     <textarea class="form-control leo-font-14" rows="20"><dict>
 			<key>Index</key>
-			<string>1</string>
+			<string>${page}</string>
                                                         <!--在张图片上面添加特殊效果（索引从1开始一直到最后一张的位置）-->
 			<key>AType</key>
 			<string>media</string>
@@ -695,7 +701,7 @@
                                                 <p>
                                                     <textarea class="form-control leo-font-14" rows="20"><dict>
 			<key>Index</key>
-			<string>1</string>
+			<string>${page}</string>
 			<key>AType</key>
 			<string>alpha</string>
 			<key>Content</key>
@@ -733,7 +739,7 @@
                                                 <p>
                                                     <textarea class="form-control leo-font-14" rows="20"><dict>
 			<key>Index</key>
-			<string>1</string>
+			<string>${page}</string>
                                                         <!--在张图片上面添加特殊效果（索引从1开始一直到最后一张的位置）-->
 			<key>AType</key>
 			<string>move</string>
@@ -782,7 +788,7 @@
                                                 <p>
                                                     <textarea class="form-control leo-font-14" rows="20"><dict>
 			<key>Index</key>
-			<string>1</string>
+			<string>${page}</string>
 			<key>AType</key>
 			<string>anchor</string>
 			<key>Content</key>
@@ -834,7 +840,7 @@
                                                 <p>
                                                     <textarea class="form-control leo-font-14" rows="20"><dict>
 			<key>Index</key>
-			<string>1</string>
+			<string>${page}</string>
 			<key>AType</key>
 			<string>gallery</string>
 			<key>BigPicPos</key>
@@ -875,7 +881,7 @@
                                                 <p>
                                                     <textarea class="form-control leo-font-14" rows="20"><dict>
 			<key>Index</key>
-			<string>1</string>
+			<string>${page}</string>
 			<key>AType</key>
 			<string>audio</string>
 			<key>file</key>
@@ -898,7 +904,7 @@
                                                 <p>
                                                     <textarea class="form-control leo-font-14" rows="20"><dict>
 			<key>Index</key>
-			<string>1</string>
+			<string>${page}</string>
 			<key>AType</key>
 			<string>focus</string>
 			<key>Pos</key>
@@ -928,7 +934,7 @@
                                                 <p>
                                                     <textarea class="form-control leo-font-14" rows="20"><dict>
 			<key>Index</key>
-			<string>1</string>
+			<string>${page}</string>
 			<key>AType</key>
 			<string>autoChangeGalley</string>
 			<key>pos</key>
@@ -967,7 +973,7 @@
                                                 <p>
                                                     <textarea class="form-control leo-font-14" rows="20"><dict>
 	<key>Index</key>
-	<string>1</string>
+	<string>${page}</string>
 	<key>AType</key>
 	<string>mask</string>
 	<key>Content</key>
@@ -1006,7 +1012,7 @@
                                                 <p>
                                                     <textarea class="form-control leo-font-14" rows="20"><dict>
 			<key>Index</key>
-			<string>1</string>
+			<string>${page}</string>
 			<key>AType</key>
 			<string>slide</string>
 			<key>Content</key>
@@ -1074,9 +1080,10 @@
 
                                     <textarea class="form-control leo-font-14" rows="15" placeholder="content" name="content"><c:out value="${content}" escapeXml="false" /></textarea>
                                     <input type="hidden" name="path" value="<c:out value="${path}" escapeXml="false" />" />
+                                    <input type="hidden" name="page" value="<c:out value="${page}" escapeXml="false" />" />
                                     <div class="horizontal-space"></div>
                                     <div>
-                                        <button type="button" onclick="window.location.href='index'" class="btn btn-default">返回列表</button>
+                                        <button type="button" onclick="window.location.href='${backUrl}'" class="btn btn-default">返回列表</button>
                                             <button type="submit" class="btn btn-default">保存</button>
                                     </div>
                                 </form>

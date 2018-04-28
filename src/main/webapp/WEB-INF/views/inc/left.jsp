@@ -26,6 +26,12 @@
 
         <c:if test="${not empty normalPattern}">
             <li>
+                <a href="/">
+                    <i class="menu-icon glyphicon glyphicon-home"></i>
+                    <span class="menu-text"> 返回 </span>
+                </a>
+            </li>
+            <li>
                 <a href="${normalPattern}">
                     <i class="menu-icon fa fa-pencil-square-o"></i>
                     <span class="menu-text"> 普通模式 </span>
@@ -35,7 +41,7 @@
 
         <c:if test="${not empty pagePattern}">
             <li>
-                <a href="${pagePattern}">
+                <a target="_blank" href="${pagePattern}">
                     <i class="menu-icon fa fa-th"></i>
                     <span class="menu-text"> 页码模式 </span>
                 </a>

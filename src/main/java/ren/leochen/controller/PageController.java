@@ -1,12 +1,10 @@
 package ren.leochen.controller;
 
-import com.dd.plist.NSArray;
-import com.dd.plist.NSDictionary;
-import com.dd.plist.NSObject;
-import com.dd.plist.PropertyListParser;
+import com.dd.plist.*;
 import com.google.common.io.Resources;
 import org.apache.commons.collections.Buffer;
 import org.apache.commons.collections.map.HashedMap;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -26,14 +24,17 @@ import org.xml.sax.SAXException;
 import ren.leochen.common.IOUtil;
 import ren.leochen.common.ZipUtil;
 import ren.leochen.common.ZipUtils;
+import sun.swing.StringUIClientPropertyKey;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -232,6 +233,7 @@ public class PageController {
     @RequestMapping("/editSave")
     public void editSave(HttpServletRequest request, HttpServletResponse response, ModelMap model) {
         String path = request.getParameter("path");
+        int page = NumberUtils.toInt(request.getParameter("page"));
 
         try {
             path = URLDecoder.decode(path, "UTF-8");
@@ -239,28 +241,139 @@ public class PageController {
             throw new RuntimeException("路径错误 -> err >>> " + e.getMessage());
         }
 
-        String content = request.getParameter("content");
+        String fromUrl = "";
+        try {
+            fromUrl = "/edit?path="+ URLEncoder.encode(path, "UTF-8") +"&page=" + page;
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException("encode编码path出现错误,err = " + e.getMessage());
+        }
 
+
+        String content = request.getParameter("content");
         String plistPath = path + "/a.plist";
         File plist = new File(plistPath);
-        try(BufferedWriter br = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(new File(plistPath)),"utf-8"));)
-        {
-            String[] text = content.split("\n");
-            for (String str : text){
-                br.write(str);
-                //br.newLine();
-            }
-            br.flush();
 
-        } catch (Exception e) {
-            throw new RuntimeException("保存plist文件失败 -> err >>> " + e.getMessage());
+        //1-备份以前的plist
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd.HH.mm.SS");
+        String bakPlistPath = path + "/a.plist." + sdf.format(new Date());
+        try {
+            FileUtils.copyFile(plist, new File(bakPlistPath));
+        } catch (IOException e) {
+            new RuntimeException("备份plist文件过程中出错了,err = " + e.getMessage());
+        }
+
+        if (page > 0 && StringUtils.isNoneBlank(StringUtils.trim(content))) {
+            //分页编辑
+            //2-删除以前plist中的对应页的效果
+            try {
+                NSDictionary root = (NSDictionary) PropertyListParser.parse(plist);
+
+                //修改正式的效果
+                NSArray aPlus = (NSArray)root.get("APlus");
+                //删除指定页
+                this.deletePageFromNSArray(aPlus, page);
+                //保存到原来的文件
+                PropertyListParser.saveAsXML(root, plist);
+
+            } catch (Exception e) {
+                new RuntimeException("删除以前plist中的对应页的效果过程中出错了,err = " + e.getMessage());
+            }
+
+            //3-添加进行的内容
+            try {
+                //新的内容
+                NSArray newContent = this.getNSArrayFromNSDictionaryString(content);
+
+                //保存
+                NSDictionary root = (NSDictionary) PropertyListParser.parse(plist);
+                NSArray aPlus = (NSArray)root.get("APlus");
+
+                NSArray list = new NSArray(aPlus.getArray().length + newContent.getArray().length);
+                int index = 0;
+                //添加新的内容
+                for (int i = 0; i < newContent.getArray().length; i ++) {
+                    NSDictionary dict = (NSDictionary)newContent.getArray()[i];
+                    list.setValue(index ++, dict);
+                }
+                //添加老的内容
+                for (int i = 0; i < aPlus.getArray().length; i ++) {
+                    NSDictionary dict = (NSDictionary)aPlus.getArray()[i];
+                    list.setValue(index ++, dict);
+                }
+
+                root.put("APlus", list);
+                //保存到原来的文件
+                PropertyListParser.saveAsXML(root, plist);
+            } catch (Exception e) {
+                new RuntimeException("格式化新的xml过程中出错了,err = " + e.getMessage());
+            }
+        } else {
+            //完整保存
+            try(BufferedWriter br = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(new File(plistPath)),"utf-8"));)
+            {
+                String[] text = content.split("\n");
+                for (String str : text){
+                    br.write(str);
+                    //br.newLine();
+                }
+                br.flush();
+
+            } catch (Exception e) {
+                throw new RuntimeException("保存plist文件失败 -> err >>> " + e.getMessage());
+            }
         }
 
         try {
-            response.sendRedirect("/");
+            response.sendRedirect(fromUrl);
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * NSDictionary字符串转成NSArray
+     * @param content
+     * @return
+     */
+    private NSArray getNSArrayFromNSDictionaryString(String content) {
+        if (StringUtils.isBlank(content)) return null;
+
+        //带上外面的格式
+        String str = "";
+        str += "<?xml version=\"1.0\" encoding=\"UTF-8\"?><!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\"> ";
+        str += "<plist version=\"1.0\">";
+        str += "<array>";
+        str += content;
+        str += "</array>";
+        str += "</plist>";
+
+        NSArray newContent = null;
+        try {
+            newContent = (NSArray) PropertyListParser.parse(str.getBytes());
+        } catch (Exception e) {
+            throw new RuntimeException("格式化新的内容出现错误,err = " + e.getMessage());
+        }
+
+        return newContent;
+    }
+
+    /**
+     * 从数组中删除指定页
+     * @param aPlus
+     * @param page
+     */
+    private void deletePageFromNSArray(NSArray aPlus, int page) {
+        for (int i = 0; i < aPlus.getArray().length; i ++) {
+            NSDictionary dict = (NSDictionary)aPlus.getArray()[i];
+            int index = NumberUtils.toInt(dict.get("Index")+"");
+            if (index == page) {
+                //标记
+                aPlus.remove(i);
+                this.deletePageFromNSArray(aPlus, page);
+                break;
+            }
+        }
+
     }
 
     /**
@@ -394,6 +507,96 @@ public class PageController {
     }
 
     /**
+     * 获取plist里面的内容值,获取某一页的
+     * @param model
+     * @param plistPath
+     * @param page
+     * @return
+     */
+    private String getPlistContentFromPath(ModelMap model, String plistPath, int page) {
+
+        File plist = new File(plistPath);
+        long totalPage = 0;
+        try {
+            NSDictionary root = (NSDictionary) PropertyListParser.parse(plist);
+
+            //修改总页数
+            totalPage = NumberUtils.toLong(root.get("totalPage").toString());
+            System.out.println("totalPage = " + totalPage);
+            if (page > totalPage) {
+                model.put("content", "");
+                return "";
+            }
+
+            //这一页的内容集合
+            StringBuilder sb = new StringBuilder();
+
+            //修改正式的效果
+            NSArray aPlus = (NSArray)root.get("APlus");
+
+            //修改正式效果的内部效果
+            for (int i = 0; i < aPlus.getArray().length; i ++) {
+                NSDictionary dict = (NSDictionary)aPlus.getArray()[i];
+                int index = NumberUtils.toInt(dict.get("Index")+"");
+                if (index == page) {
+                    String xml = fileterDontNeedXML(dict.toXMLPropertyList());
+                    System.out.println("xml = " + xml);
+                    sb.append(xml);
+                }
+            }
+
+            String content = sb.toString();
+            model.put("content", content);
+            return content;
+        } catch (Exception e) {
+            throw new RuntimeException("读取plist文件失败 -> err >>> " + e.getMessage());
+        }
+    }
+
+    /**
+     * 过滤xml中不需要的部分
+     * <?xml version="1.0" encoding="UTF-8"?>
+     * <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+     * <plist version="1.0">
+     * <dict>
+     * <key>Index</key>
+     * <string>25</string>
+     * <key>AType</key>
+     * <string>mask</string>
+     * <key>Content</key>
+     * <dict>
+     * <key>Content</key>
+     * <string>25_big.jpg</string>
+     * <key>pos</key>
+     * <string>0,-696,768,696</string>
+     * <key>pos_end</key>
+     * <string>0,0,768,696</string>
+     * <key>stay</key>
+     * <string>0</string>
+     * <key>StartPos</key>
+     * <string>0,0,768,696</string>
+     * <key>OverPos</key>
+     * <string>0,0,768,696</string>
+     * <key>dur</key>
+     * <string>0.8</string>
+     * <key>delay</key>
+     * <string>0</string>
+     * </dict>
+     * </dict>
+     * </plist>
+     * @param xml
+     * @return
+     */
+    private String fileterDontNeedXML(String xml) {
+        if (StringUtils.isBlank(xml)) return "";
+
+        int startPos = xml.indexOf("<dict>");
+        int endPos = xml.indexOf("</plist>");
+        xml = xml.substring(startPos, endPos);
+        return xml;
+    }
+
+    /**
      * 获取plist里面的内容值
      * @param model
      * @param plistPath
@@ -429,10 +632,33 @@ public class PageController {
         String path = request.getParameter("path");
 
         bindNavLink(model, path);
+        String url = "/magazine/" + path.substring(path.lastIndexOf("/") + 1);
         String realpath = setPathToModel(model, path);
         String plistPath = realpath+"/a.plist";
-        String content = getPlistContentFromPath(model, plistPath);
-        model.put("files", getMagezineFiles(realpath));
+
+        String encodePath = null;
+        try {
+            encodePath = URLEncoder.encode(realpath, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+
+        File plist = new File(plistPath);
+        long totalPage = 0;
+        try {
+            NSDictionary root = (NSDictionary) PropertyListParser.parse(plist);
+
+            //修改总页数
+            totalPage = NumberUtils.toLong(root.get("totalPage").toString());
+            System.out.println("totalPage = " + totalPage);
+            model.put("totalPage", totalPage);
+        } catch (Exception err) {
+            err.printStackTrace();
+        }
+
+        model.put("url", url);
+        model.put("path", realpath);
+        model.put("encodePath", encodePath);
         return "listEditUrl";
     }
 
@@ -447,11 +673,26 @@ public class PageController {
     public String edit(HttpServletRequest request, HttpServletResponse response, ModelMap model){
         String path = request.getParameter("path");
 
+        int page = NumberUtils.toInt(request.getParameter("page"));
+
         bindNavLink(model, path);
         String realpath = setPathToModel(model, path);
         String plistPath = realpath+"/a.plist";
-        String content = getPlistContentFromPath(model, plistPath);
-        model.put("files", getMagezineFiles(realpath));
+
+        String content = "";
+        if (page <= 0) {
+            content = getPlistContentFromPath(model, plistPath);
+        } else {
+            content = getPlistContentFromPath(model, plistPath, page);
+        }
+
+        try {
+            model.put("backUrl", page>0? "listEditUrl?path=" + URLEncoder.encode(path, "UTF-8"): "index");
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException("encode编码path出现错误,err = " + e.getMessage());
+        }
+        model.put("page", page<0? 0: page);
+        //model.put("files", getMagezineFiles(realpath));
         return "edit";
     }
 
@@ -496,7 +737,7 @@ public class PageController {
 
 
         model.put("totalPage", totalPage);
-        model.put("files", getMagezineFiles(realpath));
+        //model.put("files", getMagezineFiles(realpath));
         return "page_edit";
     }
 
