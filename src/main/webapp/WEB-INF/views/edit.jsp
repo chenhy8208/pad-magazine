@@ -30,7 +30,7 @@
                 {
                     $("#fileDataTbody").html(msg.data);
                 }
-            })
+            });
         }
 
         $(function(){
@@ -337,18 +337,20 @@
 
                 <div class="row">
 
-                    <div class="col-lg-6 col-sm-6 col-xs-12">
+                    <div class="col-lg-8 col-sm-8 col-xs-12">
                         <div class="widget">
                             <div class="widget-header bordered-bottom bordered-sky">
-                                <span class="widget-caption">选用图片</span>
+                                <span class="widget-caption">选用图片　<a class="flashAllPictureList" href="javascript:void(0);" ><i class="fa fa-repeat"></i>刷新缩略图</a></span>
+
                             </div><!--Widget Header-->
                             <div class="widget-body" style="height:203px; overflow:scroll;">
                                 <table lay-filter="demo" class="layui-table">
                                     <thead>
                                     <tr>
-                                        <th lay-data="{field:'id', width:80, sort: true}">ID</th>
-                                        <th lay-data="{field:'username', width:80}">预览</th>
-                                        <th lay-data="{field:'sex', width:80, sort: true}">文件名(点击复制)</th>
+                                        <th lay-data="{field:'id', width:20, sort: true}">ID</th>
+                                        <th lay-data="{field:'username', width:60}">预览</th>
+                                        <th lay-data="{field:'sex', width:60, sort: true}">文件名(点击复制)</th>
+                                        <th lay-data="{field:'sex', width:60, sort: true}">操作</th>
                                     </tr>
                                     </thead>
                                     <tbody id="fileDataTbody">
@@ -358,13 +360,13 @@
                         </div><!--Widget-->
                     </div>
 
-                    <div class="col-lg-6 col-sm-6 col-xs-12">
+                    <div class="col-lg-4 col-sm-4 col-xs-12">
                         <div class="widget">
                             <div class="widget-header bordered-bottom bordered-sky">
                                 <span class="widget-caption">上传文件</span>
                             </div><!--Widget Header-->
                             <div class="widget-body" style="text-align:center; height:202px;">
-                                <div class="layui-upload-drag" id="test10" style="width:370px; position:relative; top:20px;">
+                                <div class="layui-upload-drag" id="test10" style="width:220px; position:relative; top:20px;">
                                     <i class="layui-icon"></i>
                                     <p>点击上传，或将文件拖拽到此处</p>
                                 </div>
@@ -1146,6 +1148,108 @@
 
 
 <script>
+
+    //替换图片
+    $(document).on("click", ".replacePicture", function(){
+        var data_val = $(this).attr("data-val");
+        var thisTr = $("#fileDataTbody tr td:contains("+ data_val +")").parent();
+        var replaceImgDom = thisTr.find("td").eq(1).find("img");
+        var relaceName = thisTr.find("td").eq(2).text().trim();
+
+        var html = '<div class="layui-upload-drag" id="replaceUploadDiv" style="width:100%; height:100%;"><i class="layui-icon"></i><p>点击上传，或将文件拖拽到此处</p></div>';
+
+        var index = layer.open({
+            type: 1,
+            skin: 'layui-layer-rim', //加上边框
+            area: ['420px', '240px'], //宽高
+            content: html
+        });
+
+        layui.use('upload', function(){
+            var upload = layui.upload;
+
+            //执行实例
+            var uploadInst = upload.render({
+                elem: '#replaceUploadDiv' //绑定元素
+                ,url: '/uploadReplace/' //上传接口
+                ,accept:'file'
+                ,data:{path:'<c:out value="${path}" escapeXml="false" />', name: encodeURIComponent(relaceName)}
+                ,done: function(res){
+                    //上传完毕回调
+                    console.log(res);
+                    if(res.state == '0') {
+                        flushImgSrc(replaceImgDom);
+                        parent.layer.close(index);
+                    } else {
+                        layer.alert(res.msg);
+                    }
+                }
+                ,error: function(){
+                    //请求异常回调
+                    layer.alert("上传失败~");
+                }
+            });
+        });
+    });
+
+    //删除图片
+    $(document).on("click", ".deletePicture", function(){
+        var data_val = $(this).attr("data-val");
+        var thisTr = $("#fileDataTbody tr td:contains("+ data_val +")").parent();
+        var name = thisTr.find("td").eq(2).text().trim();
+
+        if (name != null) {
+            //询问框
+            var index = layer.confirm('删除以后无法找回,是否继续？', {
+                btn: ['删除','取消'] //按钮
+            }, function(){
+                //删除
+                $.ajax({
+                    type:'GET',
+                    url:"/deletePicture",
+                    data:{imgUrl: encodeURIComponent('<c:out value="${path}" escapeXml="false" />/' + name)},
+                    //async:false,
+                    success:function(msg)
+                    {
+                        loadFiles();
+                        //关闭弹出窗口
+                        parent.layer.close(index);
+                    }
+                });
+            }, function(){
+                //取消
+            });
+        }
+
+        //alert(imgDom.attr("src"));
+    });
+
+
+    //在图片地址后面加上随机的时间戳
+    function flushImgSrc(imgDom) {
+        var imgUrl = imgDom.attr("src");
+        if (imgUrl != null && imgUrl.indexOf("?") > -1) {
+            imgUrl = imgUrl.substring(0, imgUrl.indexOf("?"));
+        }
+
+        imgDom.attr("src", imgUrl+"?time=" + new Date().getTime());
+    }
+
+    //刷新全部的缩略图
+    $(document).on("click", ".flashAllPictureList", function(){
+        $("#fileDataTbody tr td img").each(function(){
+            flushImgSrc($(this));
+        });
+    });
+
+    //刷新单张图片
+    $(document).on("click", ".flashPicture", function(){
+        var data_val = $(this).attr("data-val");
+        var thisTr = $("#fileDataTbody tr td:contains("+ data_val +")").parent();
+        var imgDom = thisTr.find("td").eq(1).find("img");
+        flushImgSrc(imgDom);
+    });
+
     //--Jquery Select2--
     $("#e1").select2();
     $("#e2").select2({

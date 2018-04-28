@@ -43,6 +43,59 @@ import java.util.*;
 @Controller
 public class PageController {
 
+    /**
+     * 上传文件替换原图片
+     * @param request
+     * @param response
+     * @param file
+     * @param model
+     * @return
+     */
+    @RequestMapping("/uploadReplace")
+    public @ResponseBody Map<String,String> uploadReplace(HttpServletRequest request, HttpServletResponse response, @RequestParam("file") MultipartFile file, ModelMap model){
+        Map<String,String> msg = new HashMap<String,String>();
+
+        String path = request.getParameter("path");
+        String name = request.getParameter("name");
+
+        try {
+            path = URLDecoder.decode(path, "UTF-8");
+            name = URLDecoder.decode(name, "UTF-8");
+        }catch (UnsupportedEncodingException e) {
+            throw new RuntimeException("路径错误 -> err >>> " + e.getMessage());
+        }
+
+        if (file != null && !file.isEmpty()) {
+            //String filename = StringUtils.trimToEmpty(file.getOriginalFilename());
+            String filename = name;
+
+            //文件保存目录路径
+            File oFile = new File(path);
+            //检查目录写权限
+            if(!oFile.canWrite()){
+                msg.put("state", "1");
+                msg.put("msg", "上传失败，上传目录没有写权限！");
+                msg.put("path", "");
+
+                return msg;
+            }
+
+            try{
+                File uploadedFile = new File(path + "/" + filename);
+                file.transferTo(uploadedFile);
+
+                msg.put("state", "0");
+                msg.put("msg", "上传成功");
+            }catch(Exception e){
+                e.printStackTrace();
+                msg.put("state", "0");
+                msg.put("msg", "上传失败，出现异常！");
+            }
+        }
+
+        return msg;
+    }
+
     @RequestMapping("/upload")
     public @ResponseBody Map<String,String> upload(HttpServletRequest request, HttpServletResponse response, @RequestParam("file") MultipartFile file, ModelMap model){
         Map<String,String> msg = new HashMap<String,String>();
@@ -210,6 +263,36 @@ public class PageController {
         }
     }
 
+    /**
+     * 删除文件
+     * @param request
+     * @param model
+     * @return
+     */
+    @RequestMapping("/deletePicture")
+    public @ResponseBody Map<String,Object> deletePicture(HttpServletRequest request, ModelMap model)
+    {
+        Map<String, Object> rs = new HashedMap();
+
+        String imgUrl = request.getParameter("imgUrl");
+
+        try {
+            imgUrl = URLDecoder.decode(imgUrl, "UTF-8");
+        }catch (UnsupportedEncodingException e) {
+            throw new RuntimeException("路径错误 -> err >>> " + e.getMessage());
+        }
+
+        if (StringUtils.isNoneBlank(imgUrl)) {
+            File dir = new File(imgUrl);
+            if (dir.exists()) {
+                dir.delete();
+            }
+        }
+
+        rs.put("err", 0);
+        return rs;
+    }
+
     @RequestMapping("/fileList")
     public @ResponseBody Map<String,Object> fileList(HttpServletRequest request, ModelMap model)
     {
@@ -229,9 +312,13 @@ public class PageController {
         if (list != null && list.size() > 0) {
             for (Map data : list) {
                 sb.append("<tr data-clipboard-text='"+ data.get("name") +"' class='selectPicTr'>");
-                sb.append(" <td>"+ data.get("id") +" </td>");
+                sb.append(" <td>"+ data.get("id") +"</td>");
                 sb.append(" <td align=\"center\">"+ data.get("url") +"</td>");
                 sb.append(" <td>"+ data.get("name")+"</td>");
+                sb.append(" <td><a  href='javascript:void(0);' data-val='"+ data.get("id") +"' class='flashPicture'><i class=\"fa fa-repeat\"></i></a>&nbsp;" +
+                          "<a class='replacePicture btn btn-blue shiny' data-val='"+ data.get("id") +"' href='javascript:void(0);'>替换</a>&nbsp;" +
+                          "<a class='deletePicture btn btn-danger shiny' data-val='"+ data.get("id") +"' href='javascript:void(0);'>删除</a></td>");
+
                 sb.append("</tr>");
             }
         }
@@ -257,7 +344,8 @@ public class PageController {
                     String name = file.getName();
                     if (name.endsWith(".jpg") || name.endsWith(".png")|| name.endsWith(".jpeg")) {
                         String src = url + "/" + name;
-                        name = "<a href='"+ src + "' target='_blank'><img src='"+ src +"' height='40' /></a>";
+                        src += "?time=" + new Date().getTime();
+                        name = "<a href='"+ src + "' target='_blank'><img src='"+ src +"' height='80' /></a>";
                     }
 
                     nFile.put("name", file.getName());
@@ -329,6 +417,32 @@ public class PageController {
         }
     }
 
+    /**
+     * 分页编辑
+     * @param request
+     * @param response
+     * @param model
+     * @return
+     */
+    @RequestMapping("/listEditUrl")
+    public String listEditUrl(HttpServletRequest request, HttpServletResponse response, ModelMap model){
+        String path = request.getParameter("path");
+
+        bindNavLink(model, path);
+        String realpath = setPathToModel(model, path);
+        String plistPath = realpath+"/a.plist";
+        String content = getPlistContentFromPath(model, plistPath);
+        model.put("files", getMagezineFiles(realpath));
+        return "listEditUrl";
+    }
+
+    /**
+     * 完整编辑
+     * @param request
+     * @param response
+     * @param model
+     * @return
+     */
     @RequestMapping("/edit")
     public String edit(HttpServletRequest request, HttpServletResponse response, ModelMap model){
         String path = request.getParameter("path");
@@ -747,6 +861,7 @@ public class PageController {
                     data.put("path", path);
                     data.put("url", "/download?path=" + encodePath+"&name=" + f.getName());
                     data.put("editUrl", "/edit?path=" + encodePath);
+                    data.put("listEditUrl", "/listEditUrl?path=" + encodePath);
                     data.put("delUrl", "/del?path=" + encodePath);
                     list.add(data);
                 }

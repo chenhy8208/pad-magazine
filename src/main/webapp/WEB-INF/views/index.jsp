@@ -340,7 +340,8 @@
                                         </td>
                                         <td>
                                             <a href="<c:out value="${m.url}" escapeXml="false" />" class="btn btn-success shiny">下载Zip</a>
-                                            <a href="<c:out value="${m.editUrl}" escapeXml="false" />" class="btn btn-warning shiny">编辑</a>
+                                            <a href="<c:out value="${m.listEditUrl}" escapeXml="false" />" class="btn btn-magenta shiny">分页编辑</a>
+                                            <a href="<c:out value="${m.editUrl}" escapeXml="false" />" class="btn btn-warning shiny">完整编辑</a>
                                             <a href="<c:out value="${m.delUrl}" escapeXml="false" />" onclick="return confirm('删除后无法恢复,确定要删除吗')" class="btn btn-danger shiny">删除</a>
                                         </td>
                                     </tr>
